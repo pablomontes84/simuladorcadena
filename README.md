@@ -1,2 +1,2 @@
 # simuladorcadena
-simulador cadena
+simulador cadena critica
