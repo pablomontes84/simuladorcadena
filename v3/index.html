@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Cadena Crítica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blueprint:#0E3A5C;
+    --blueprint-deep:#082A44;
+    --line:#7FC7E8;
+    --orange:#E8722C;
+    --concrete:#EDE8DE;
+    --ink:#16242C;
+    --steel:#5C6B73;
+    --paper:#F7F4EC;
+    --danger:#C24B4B;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--concrete);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  .sheet{max-width:1220px;margin:0 auto;padding:0 0 60px;}
+
+  header{
+    background:
+      repeating-linear-gradient(0deg, rgba(127,199,232,.08) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, rgba(127,199,232,.08) 0 1px, transparent 1px 28px),
+      linear-gradient(160deg, var(--blueprint) 0%, var(--blueprint-deep) 100%);
+    color:var(--paper);
+    padding:34px 40px 26px;
+    border-bottom:6px solid var(--orange);
+  }
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:var(--line);text-transform:uppercase;margin-bottom:8px;}
+  h1{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:700;font-size:clamp(26px,3.6vw,40px);margin:0 0 10px;letter-spacing:-.01em;}
+  header p{max-width:760px;color:#CFE4EF;font-size:14.5px;line-height:1.6;margin:0 0 6px;}
+  header .fuente{font-size:12px;color:#9EC3D6;}
+
+  main{padding:30px 40px 0;}
+  .section-title{display:flex;align-items:baseline;gap:10px;margin:0 0 16px;}
+  .section-title .tag{font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--blueprint);color:var(--line);padding:3px 8px;border-radius:2px;}
+  .section-title h2{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:21px;margin:0;}
+
+  /* ---- chain count selector ---- */
+  .chain-count{display:flex;gap:8px;margin-bottom:22px;align-items:center;}
+  .chain-count span{font-size:12.5px;color:var(--steel);margin-right:6px;}
+  .chain-count button{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:14px;font-weight:600;
+    border:1.5px solid var(--blueprint);
+    background:var(--paper);
+    color:var(--blueprint);
+    width:36px;height:36px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .chain-count button.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+
+  /* ---- input cards ---- */
+  .chain-cards{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;}
+  .chain-card{
+    flex:0 0 232px;
+    background:var(--paper);
+    border:1px solid #D8D2C4;
+    border-top:5px solid var(--c, var(--blueprint));
+    padding:14px 16px 16px;
+  }
+  .chain-card h3{margin:0 0 12px;font-size:14.5px;display:flex;align-items:center;gap:6px;}
+  .chain-card h3 .sw{width:10px;height:10px;border-radius:2px;background:var(--c,var(--blueprint));display:inline-block;}
+  .act-block{margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed #D8D2C4;}
+  .act-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+  .act-block .aname{font-size:12px;font-weight:600;margin-bottom:6px;}
+  .slider-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+  .slider-row label{font-size:10.5px;color:var(--steel);width:34px;flex-shrink:0;}
+  .slider-row input[type=range]{flex:1;accent-color:var(--orange);height:14px;}
+  .slider-row .v{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;width:34px;text-align:right;flex-shrink:0;}
+
+  /* ---- metrics strip ---- */
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--steel);margin:30px 0 0;}
+  .metric{background:var(--paper);padding:16px 18px;}
+  .metric .label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--steel);letter-spacing:.05em;text-transform:uppercase;}
+  .metric .value{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--blueprint);margin-top:4px;}
+  .metric.crit .value{color:var(--orange);}
+
+  /* ---- gantt ---- */
+  .gantt{margin-top:0;background:var(--paper);border:1px solid #D8D2C4;padding:22px 24px 26px;}
+  .gantt-row{display:grid;grid-template-columns:130px 1fr;align-items:center;gap:12px;margin-bottom:10px;}
+  .gantt-row .rlabel{font-size:12.5px;display:flex;flex-direction:column;}
+  .gantt-row .rlabel b{font-size:13px;}
+  .gantt-row .rlabel .badge{font-family:'IBM Plex Mono',monospace;font-size:9.5px;background:var(--orange);color:#fff;padding:1px 6px;border-radius:2px;width:fit-content;margin-top:3px;}
+  .track{position:relative;height:30px;background:#E4DECF;border-radius:2px;overflow:hidden;}
+  .seg{position:absolute;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#fff;overflow:hidden;white-space:nowrap;border-right:1px solid rgba(255,255,255,.35);}
+  .seg.buffer{background:repeating-linear-gradient(45deg, var(--orange) 0 6px, #F0A46E 6px 12px);color:#fff;}
+  .seg.slack{background:repeating-linear-gradient(45deg, #C9C2B2 0 6px, #D8D2C4 6px 12px);color:var(--steel);}
+  .seg.idle{background:repeating-linear-gradient(45deg, var(--danger) 0 5px, #E89494 5px 10px);color:#fff;border-right:1px solid rgba(255,255,255,.5);}
+  .legend{display:flex;gap:18px;margin-top:16px;font-size:11.5px;color:var(--steel);flex-wrap:wrap;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend .sw{width:14px;height:10px;border-radius:2px;display:inline-block;}
+
+  .sync-control{display:flex;align-items:center;gap:8px;margin:0 0 22px;font-size:13px;color:var(--ink);background:var(--paper);border:1px solid #D8D2C4;padding:10px 14px;width:fit-content;}
+  .sync-control input{width:16px;height:16px;accent-color:var(--orange);cursor:pointer;}
+  .sync-control label{cursor:pointer;}
+  .slider-row input[type=number]{width:70px;font-family:'IBM Plex Mono',monospace;font-size:12px;border:1px solid #C9C2B2;border-radius:2px;padding:3px 6px;background:#fff;}
+  .calc-personal{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--blueprint);margin-top:2px;}
+  .calc-personal b{font-size:13px;color:var(--orange);}
+  .chain-card.locked{opacity:.6;}
+  .chain-card.locked input[type=range]{cursor:not-allowed;}
+  .chain-card.locked input[type=number]{cursor:not-allowed;background:#EDE8DE;}
+
+  /* ---- personnel chart ---- */
+  .staffing{margin-top:26px;background:var(--paper);border:1px solid #D8D2C4;padding:22px 24px 20px;}
+  .staffing-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:16px;}
+  .cap-control{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--steel);}
+  .cap-control input[type=range]{accent-color:var(--danger);width:160px;}
+  .cap-control .v{font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--danger);width:24px;}
+  .chart-wrap{display:flex;gap:8px;}
+  .y-axis{display:flex;flex-direction:column;justify-content:space-between;width:34px;flex-shrink:0;padding:2px 0;text-align:right;}
+  .y-axis span{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--steel);transform:translateY(-50%);}
+  .chart-area{position:relative;height:180px;border-bottom:2px solid var(--blueprint);border-left:2px solid var(--blueprint);flex:1;}
+  .bars-wrap{display:flex;align-items:flex-end;height:100%;gap:1px;}
+  .day-bar{flex:1;background:var(--blueprint);min-width:2px;position:relative;}
+  .day-bar.over{background:var(--danger);}
+  .day-bar.spike{background:#FF1E3C;box-shadow:0 0 0 1px #FF1E3C;}
+  .cap-line{position:absolute;left:0;right:0;border-top:2px dashed var(--danger);}
+  .cap-line .cap-tag{position:absolute;right:0;top:-16px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--danger);}
+  .axis-note{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--steel);margin-top:8px;}
+
+  footer{padding:26px 40px 10px;font-size:12px;color:var(--steel);font-family:'IBM Plex Mono',monospace;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Grupo ITSA · Capacitación técnica</div>
+  <h1>Simulador de Cadena Crítica</h1>
+  <p>De 2 a 5 frentes de trabajo en cadena, cada uno con 4 actividades en secuencia. El segundo frente inicia al terminar la primera actividad del frente anterior, y así sucesivamente. Ajusta cuadrillas y duraciones para ver cómo cambian la ruta crítica, el buffer de proyecto y la dotación de personal día a día.</p>
+  <p class="fuente">Basado en el enfoque de Cadena Crítica (Critical Chain) de Eliyahu Goldratt, extensión de la Teoría de Restricciones que plantea en "La Meta": en vez de dar holgura a cada actividad, se protege el proyecto completo con un solo buffer al final de la cadena crítica.</p>
+</header>
+
+<main>
+
+  <div class="section-title"><span class="tag">PASO 1</span><h2>¿Cuántos frentes de trabajo?</h2></div>
+  <div class="chain-count">
+    <span>Frentes en cadena:</span>
+    <button data-n="2">2</button>
+    <button data-n="3">3</button>
+    <button data-n="4">4</button>
+    <button data-n="5">5</button>
+  </div>
+
+  <div class="sync-control">
+    <input type="checkbox" id="syncCheckbox">
+    <label for="syncCheckbox">Igualar días y cuadrillas de todos los frentes al Frente 1</label>
+  </div>
+
+  <div class="sync-control">
+    <input type="checkbox" id="depCheckbox" checked>
+    <label for="depCheckbox">Cada tarea depende de su homóloga del frente anterior (desactiva = frentes como trenes independientes)</label>
+  </div>
+
+  <div class="sync-control">
+    <label for="offsetSelect" style="margin-right:4px">El frente siguiente inicia al terminar la tarea:</label>
+    <select id="offsetSelect" style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;padding:4px 8px;border:1px solid #C9C2B2;border-radius:2px;background:#fff;cursor:pointer;">
+      <option value="0" selected>Tarea 1 (Cimentación)</option>
+      <option value="1">Tarea 2 (Estructura)</option>
+      <option value="2">Tarea 3 (Mampostería)</option>
+      <option value="3">Tarea 4 (Acabados)</option>
+    </select>
+  </div>
+
+  <div class="chain-cards" id="chainCards"></div>
+
+  <div class="metrics" id="metrics"></div>
+
+  <div class="section-title" style="margin-top:30px"><span class="tag">PASO 2</span><h2>Cronograma de cadenas</h2></div>
+  <div class="gantt">
+    <div id="ganttRows"></div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--orange)"></i>Buffer de proyecto (50% de la cadena crítica)</span>
+      <span><i class="sw" style="background:#C9C2B2"></i>Holgura (frente no crítico)</span>
+      <span><i class="sw" style="background:var(--danger)"></i>Cuadrilla ociosa esperando su predecesora</span>
+      <span><i class="sw" style="background:var(--blueprint)"></i>Actividad en ejecución</span>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:30px"><span class="tag">PASO 3</span><h2>Dotación de personal por día</h2></div>
+  <div class="staffing">
+    <div class="staffing-head">
+      <div class="cap-control">
+        <label>Personal disponible en obra:</label>
+        <input type="range" id="capInput" min="5" max="80" value="20">
+        <span class="v" id="capVal">20</span>
+      </div>
+      <div style="font-size:12px;color:var(--steel)">Rojo = supera el personal disponible &nbsp;·&nbsp; <span style="color:#FF1E3C;font-weight:600">Rojo intenso</span> = el requerimiento sube más de 10 personas respecto al día anterior</div>
+    </div>
+    <div class="chart-wrap">
+      <div class="y-axis" id="yAxis"></div>
+      <div class="chart-area">
+        <div class="bars-wrap" id="barsWrap"></div>
+        <div class="cap-line" id="capLine"><span class="cap-tag" id="capTag">20</span></div>
+      </div>
+    </div>
+    <div class="axis-note">Eje horizontal: días del proyecto (día 0 → fin de buffer) · Eje vertical: personas en obra ese día</div>
+  </div>
+
+</main>
+
+<footer>simulador_cadena_critica.html — generado para capacitación interna, editable y reutilizable.</footer>
+
+<script>
+const COLORS = ['#E8722C','#0E3A5C','#3E8E5C','#8B5CA8','#C24B4B'];
+const ACT_NAMES = ['Cimentación','Estructura','Mampostería','Acabados'];
+
+const POOL = [
+  { activities:[{dh:48,d:8},{dh:96,d:12},{dh:50,d:10},{dh:56,d:14}] },
+  { activities:[{dh:30,d:6},{dh:70,d:10},{dh:54,d:9},{dh:55,d:11}] },
+  { activities:[{dh:36,d:9},{dh:126,d:14},{dh:40,d:8},{dh:72,d:12}] },
+  { activities:[{dh:35,d:7},{dh:66,d:11},{dh:44,d:11},{dh:45,d:9}] },
+  { activities:[{dh:60,d:10},{dh:45,d:9},{dh:84,d:12},{dh:40,d:10}] },
+];
+
+let numChains = 3;
+let capacity = 20;
+let syncFrentes = false;
+let homologDependency = true;
+let offsetIdx = 0; // índice (0-based) de la tarea del frente anterior que dispara el inicio del siguiente frente
+
+function chains(){ return POOL.slice(0, numChains); }
+
+// Cada actividad solo puede iniciar cuando:
+//  a) su propia predecesora en el mismo frente ha terminado, Y
+//  b) (si homologDependency está activo) la misma actividad (homóloga) del
+//     frente anterior ha terminado. Con homologDependency desactivado, los
+//     frentes son "trenes" independientes: solo el arranque del frente completo
+//     depende de que la tarea seleccionada (offsetIdx) del frente anterior haya terminado.
+// Si la propia predecesora termina después de que la homóloga ya terminó,
+// la cuadrilla de esa actividad queda ociosa desde que la homóloga terminó
+// hasta que por fin puede iniciar (solo aplica con homologDependency activo, i>0).
+function computeSchedule(){
+  const cs = chains();
+  const schedule = [];
+  let idleTotalDays = 0;
+  let idleTotalPersonDays = 0;
+
+  for(let k = 0; k < cs.length; k++){
+    const acts = [];
+    for(let i = 0; i < 4; i++){
+      const raw = cs[k].activities[i];
+      const p = Math.max(0, Math.floor(raw.dh / raw.d));
+      const a = { dh: raw.dh, d: raw.d, p };
+      const homologEnd = k > 0 ? schedule[k-1].activities[i].end : null;
+      const triggerEnd = k > 0 ? schedule[k-1].activities[offsetIdx].end : null;
+      const ownPredEnd = i > 0 ? acts[i-1].end : null;
+
+      let start;
+      if(homologDependency){
+        if(k === 0){
+          start = i === 0 ? 0 : ownPredEnd;
+        } else {
+          start = i === 0 ? triggerEnd : Math.max(ownPredEnd, homologEnd);
+        }
+      } else {
+        // tren independiente: solo la primera actividad depende del frente anterior
+        if(i === 0){
+          start = k === 0 ? 0 : triggerEnd;
+        } else {
+          start = ownPredEnd;
+        }
+      }
+      const end = start + a.d;
+
+      let idle = 0;
+      if(homologDependency && k > 0 && i > 0){
+        idle = Math.max(0, start - homologEnd);
+      }
+      idleTotalDays += idle;
+      idleTotalPersonDays += idle * a.p;
+
+      acts.push({ ...a, nombre: ACT_NAMES[i], start, end, idle, idleFrom: homologEnd });
+    }
+    schedule.push({ start: acts[0].start, finish: acts[3].end, activities: acts });
+  }
+
+  const maxFinish = Math.max(...schedule.map(s => s.finish));
+  const criticalIdx = schedule.findIndex(s => s.finish === maxFinish);
+  const criticalChain = schedule[criticalIdx];
+  const criticalDuration = criticalChain.finish - criticalChain.start;
+  const buffer = Math.round(criticalDuration * 0.5 * 10) / 10;
+  const projectEnd = criticalChain.finish + buffer;
+
+  return { schedule, criticalIdx, buffer, projectEnd, criticalDuration, idleTotalDays, idleTotalPersonDays };
+}
+
+function buildCountButtons(){
+  const btns = document.querySelectorAll('.chain-count button');
+  btns.forEach(b => {
+    b.classList.toggle('active', Number(b.dataset.n) === numChains);
+    b.onclick = () => { numChains = Number(b.dataset.n); buildCountButtons(); buildCards(); renderAll(); };
+  });
+}
+
+function syncToFrente1(){
+  for(let k = 1; k < POOL.length; k++){
+    POOL[k].activities = POOL[0].activities.map(a => ({ ...a }));
+  }
+}
+
+function buildCards(){
+  const wrap = document.getElementById('chainCards');
+  wrap.innerHTML = chains().map((chain, k) => {
+    const locked = syncFrentes && k > 0;
+    return `
+    <div class="chain-card ${locked ? 'locked' : ''}" style="--c:${COLORS[k]}">
+      <h3><span class="sw"></span>Frente ${k+1}${locked ? ' 🔒' : ''}</h3>
+      ${chain.activities.map((a, i) => {
+        const p = Math.max(0, Math.floor(a.dh / a.d));
+        return `
+        <div class="act-block">
+          <div class="aname">${ACT_NAMES[i]}</div>
+          <div class="slider-row">
+            <label>d-h</label>
+            <input type="number" min="1" max="250" value="${a.dh}" data-k="${k}" data-i="${i}" data-f="dh" ${locked ? 'disabled' : ''}>
+            <span class="v">dh</span>
+          </div>
+          <div class="slider-row">
+            <label>días</label>
+            <input type="range" min="1" max="18" value="${a.d}" data-k="${k}" data-i="${i}" data-f="d" ${locked ? 'disabled' : ''}>
+            <span class="v" id="v-${k}-${i}-d">${a.d}</span>
+          </div>
+          <div class="calc-personal">personal necesario = <b id="p-${k}-${i}">${p}</b></div>
+        </div>
+      `;
+      }).join('')}
+    </div>
+  `;
+  }).join('');
+
+  wrap.querySelectorAll('input[type=range], input[type=number]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const k = Number(e.target.dataset.k), i = Number(e.target.dataset.i), f = e.target.dataset.f;
+      let val = Number(e.target.value);
+      if(f === 'dh') val = Math.max(1, Math.min(250, val || 1));
+      if(f === 'd') val = Math.max(1, Math.min(18, val || 1));
+      POOL[k].activities[i][f] = val;
+      if(f === 'd') document.getElementById(`v-${k}-${i}-d`).textContent = val;
+      const act = POOL[k].activities[i];
+      const p = Math.max(0, Math.floor(act.dh / act.d));
+      const pEl = document.getElementById(`p-${k}-${i}`);
+      if(pEl) pEl.textContent = p;
+      if(syncFrentes && k === 0){
+        syncToFrente1();
+        buildCards();
+      }
+      renderAll();
+    });
+  });
+}
+
+function renderMetrics(sched){
+  const { criticalIdx, buffer, projectEnd, criticalDuration, idleTotalDays, idleTotalPersonDays } = sched;
+  const el = document.getElementById('metrics');
+  el.innerHTML = `
+    <div class="metric"><div class="label">Duración total (con buffer)</div><div class="value">${projectEnd.toFixed(1)} d</div></div>
+    <div class="metric crit"><div class="label">Cadena crítica</div><div class="value">Frente ${criticalIdx+1}</div></div>
+    <div class="metric"><div class="label">Buffer de proyecto</div><div class="value">${buffer.toFixed(1)} d</div></div>
+    <div class="metric" style="border-left:3px solid var(--danger)"><div class="label">Días-cuadrilla ociosos</div><div class="value" style="color:var(--danger)">${idleTotalPersonDays.toFixed(0)}</div></div>
+  `;
+}
+
+function renderGantt(sched){
+  const { schedule, criticalIdx, projectEnd } = sched;
+  const rows = document.getElementById('ganttRows');
+  rows.innerHTML = schedule.map((s, k) => {
+    const isCrit = k === criticalIdx;
+    const segs = s.activities.map(a => {
+      const left = (a.start / projectEnd) * 100;
+      const width = (a.d / projectEnd) * 100;
+      let idleSeg = '';
+      if(a.idle > 0){
+        const iLeft = (a.idleFrom / projectEnd) * 100;
+        const iWidth = (a.idle / projectEnd) * 100;
+        idleSeg = `<div class="seg idle" style="left:${iLeft}%;width:${iWidth}%" title="Cuadrilla de ${a.nombre} ociosa ${a.idle}d">${iWidth>5?a.idle+'d':''}</div>`;
+      }
+      return idleSeg + `<div class="seg" style="left:${left}%;width:${width}%;background:${COLORS[k]}">${width > 6 ? a.nombre.slice(0,4)+' '+a.d+'d' : ''}</div>`;
+    }).join('');
+    let tail = '';
+    if(isCrit){
+      const left = (s.finish / projectEnd) * 100;
+      const width = 100 - left;
+      tail = `<div class="seg buffer" style="left:${left}%;width:${width}%">${width>6?'buffer':''}</div>`;
+    } else {
+      const left = (s.finish / projectEnd) * 100;
+      const width = 100 - left;
+      if(width > 0.3) tail = `<div class="seg slack" style="left:${left}%;width:${width}%">${width>6?'holgura':''}</div>`;
+    }
+    return `
+      <div class="gantt-row">
+        <div class="rlabel"><b>Frente ${k+1}</b>${isCrit ? '<span class="badge">CADENA CRÍTICA</span>' : ''}</div>
+        <div class="track">${segs}${tail}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderStaffing(sched){
+  const { schedule, projectEnd } = sched;
+  const totalDays = Math.max(1, Math.ceil(projectEnd));
+  const perDay = new Array(totalDays).fill(0);
+  schedule.forEach(s => {
+    s.activities.forEach(a => {
+      for(let d = Math.floor(a.start); d < Math.ceil(a.end); d++){
+        if(d >= 0 && d < totalDays) perDay[d] += a.p;
+      }
+    });
+  });
+  const maxVal = Math.max(...perDay, capacity) * 1.15;
+  const barsWrap = document.getElementById('barsWrap');
+  barsWrap.innerHTML = perDay.map((v, idx) => {
+    const h = (v / maxVal) * 100;
+    const over = v > capacity;
+    const delta = idx > 0 ? v - perDay[idx-1] : 0;
+    const spike = delta > 10;
+    const cls = spike ? 'spike' : (over ? 'over' : '');
+    const titleExtra = spike ? ` (+${delta} vs. día anterior)` : '';
+    return `<div class="day-bar ${cls}" style="height:${h}%" title="${v} personas${titleExtra}"></div>`;
+  }).join('');
+  const capLine = document.getElementById('capLine');
+  const capPct = 100 - (capacity / maxVal) * 100;
+  capLine.style.top = capPct + '%';
+  document.getElementById('capTag').textContent = capacity + ' disponibles';
+
+  const yAxis = document.getElementById('yAxis');
+  const ticks = 5;
+  const labels = [];
+  for(let t = ticks; t >= 0; t--){
+    labels.push(Math.round((maxVal / ticks) * t));
+  }
+  yAxis.innerHTML = labels.map(v => `<span>${v}</span>`).join('');
+}
+
+function renderAll(){
+  const sched = computeSchedule();
+  renderMetrics(sched);
+  renderGantt(sched);
+  renderStaffing(sched);
+}
+
+document.getElementById('capInput').addEventListener('input', e => {
+  capacity = Number(e.target.value);
+  document.getElementById('capVal').textContent = capacity;
+  renderAll();
+});
+
+document.getElementById('syncCheckbox').addEventListener('change', e => {
+  syncFrentes = e.target.checked;
+  if(syncFrentes) syncToFrente1();
+  buildCards();
+  renderAll();
+});
+
+document.getElementById('depCheckbox').addEventListener('change', e => {
+  homologDependency = e.target.checked;
+  renderAll();
+});
+
+document.getElementById('offsetSelect').addEventListener('change', e => {
+  offsetIdx = Number(e.target.value);
+  renderAll();
+});
+
+buildCountButtons();
+buildCards();
+renderAll();
+</script>
+
+</body>
+</html>
