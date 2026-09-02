@@ -1,0 +1,537 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora Multiparti﻿da de Esfuerzo · Días-Hombre</title>
+<style>
+:root{
+  --navy:#0E3A5C;
+  --navy2:#082A44;
+  --orange:#E8722C;
+  --cream:#F2EEE6;
+  --paper:#FFFEFA;
+  --ink:#17252D;
+  --steel:#65757E;
+  --line:#D8D1C4;
+  --green:#31825B;
+  --red:#BD4B4B;
+  --blue:#2A6E9E;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif}
+.wrap{max-width:1320px;margin:auto;padding-bottom:60px}
+header{
+  background:
+    linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px),
+    linear-gradient(150deg,var(--navy),var(--navy2));
+  background-size:28px 28px,28px 28px,auto;
+  color:white;padding:32px 38px 28px;border-bottom:5px solid var(--orange)
+}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#A9D7EC;font-weight:800}
+h1{font-size:34px;margin:7px 0 10px}
+header p{max-width:900px;margin:0;color:#D3E6F0;line-height:1.55;font-size:15px}
+.header-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:28px;flex-wrap:wrap}
+.header-copy{flex:1 1 700px;min-width:280px}
+.brand-area{display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:0 0 auto}
+.brand-box{
+  background:rgba(255,254,250,.98);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:10px;
+  padding:11px 16px;
+  min-width:250px;
+  box-shadow:0 10px 24px rgba(0,0,0,.18);
+}
+.brand-box img{display:block;max-width:270px;width:100%;height:auto}
+.training-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(232,114,44,.16);
+  border:1px solid rgba(232,114,44,.55);
+  color:#FFE2CE;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:10.5px;
+  font-weight:800;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.training-badge:before{
+  content:'';
+  width:7px;height:7px;border-radius:50%;
+  background:var(--orange);
+  box-shadow:0 0 0 3px rgba(232,114,44,.18);
+}
+main{padding:26px 34px}
+.global{
+  display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch;margin-bottom:22px
+}
+.card{
+  background:var(--paper);border:1px solid var(--line);border-radius:11px;
+  padding:18px;box-shadow:0 5px 16px rgba(20,40,50,.035)
+}
+.global-card{
+  display:flex;justify-content:space-between;align-items:center;gap:20px;
+  border-left:6px solid var(--orange)
+}
+.global-card h2{margin:0;color:var(--navy);font-size:20px}
+.global-values{display:grid;grid-template-columns:1fr 1fr;gap:12px;min-width:520px}
+.global-input{min-width:0}
+.global-card p{margin:5px 0 0;font-size:12px;color:var(--steel)}
+
+label{display:block;font-size:11px;color:var(--steel);font-weight:800;margin-bottom:5px;text-transform:uppercase;letter-spacing:.03em}
+.input-wrap{display:flex;align-items:center;border:1px solid #CFC7B8;background:#fff;border-radius:6px;overflow:hidden}
+.input-wrap input,.input-wrap select{
+  width:100%;border:0;outline:0;padding:9px 10px;font-size:15px;font-weight:700;color:var(--navy);background:white
+}
+.unit{padding:0 10px;font-size:11px;color:var(--steel);white-space:nowrap}
+.concept-card{background:#FFF8EC;border-color:#EACB9E}
+.concept-card b{color:var(--navy)}
+.concept-card p{font-size:13px;line-height:1.5;margin:0}
+.modebar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 20px}
+.modebar button,.add-btn,.countbar button{
+  border:1.5px solid var(--navy);background:var(--paper);color:var(--navy);font-weight:800;
+  border-radius:6px;padding:9px 14px;cursor:pointer
+}
+.modebar button.active,.countbar button.active{background:var(--orange);border-color:var(--orange);color:#fff}
+.countbar{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.countbar span{font-size:12px;color:var(--steel);font-weight:800;margin-right:3px}
+.countbar button{width:36px;height:34px;padding:0;border:1.5px solid var(--navy);background:var(--paper);color:var(--navy);font-weight:800;border-radius:6px;cursor:pointer}
+.var-pos{color:var(--red);font-weight:900}
+.var-neg{color:var(--green);font-weight:900}
+.var-zero{color:var(--navy);font-weight:900}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin:26px 0 12px}
+.section-head h2{margin:0;color:var(--navy);font-size:22px}
+.section-head p{margin:4px 0 0;font-size:12px;color:var(--steel)}
+.partidas-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.partida{position:relative;border-top:5px solid var(--c,var(--orange))}
+.partida-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.partida-title{
+  border:0;border-bottom:1px dashed #BFB7A8;background:transparent;color:var(--navy);
+  font-size:18px;font-weight:800;outline:none;width:70%
+}
+.index-tag{font-size:11px;font-weight:800;background:var(--navy);color:#BFE6F6;padding:4px 8px;border-radius:999px}
+.remove-btn{border:0;background:transparent;color:var(--red);font-size:13px;cursor:pointer;font-weight:700}
+.field-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.calc-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#A9AFB0;margin-top:14px;border-radius:7px;overflow:hidden}
+.calc{background:#F8F6F1;padding:11px}
+.calc .l{font-size:10px;color:var(--steel);font-weight:800;text-transform:uppercase}
+.calc .v{font-size:18px;color:var(--navy);font-weight:800;margin-top:4px}
+.calc.eff .v{color:var(--orange)}
+.agile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.agile-card{border-left:5px solid var(--orange)}
+.agile-main{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.readonly{
+  min-height:67px;border-radius:7px;background:linear-gradient(135deg,var(--navy),#175278);
+  padding:11px 13px;color:#fff
+}
+.readonly .l{font-size:10px;color:#C8E0ED;text-transform:uppercase;font-weight:800}
+.readonly .v{font-size:25px;font-weight:900;margin-top:5px}
+.range-row{margin-top:12px}
+.range-row .rh{display:flex;justify-content:space-between;font-size:11px;color:var(--steel);font-weight:800}
+.range-row input{width:100%;accent-color:var(--orange)}
+.agile-results{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.mini{background:#F7F5F0;border:1px solid #E2DDD2;border-radius:6px;padding:9px}
+.mini .l{font-size:10px;color:var(--steel);font-weight:800;text-transform:uppercase}
+.mini .v{font-size:16px;color:var(--navy);font-weight:800;margin-top:3px}
+.scenario-card{margin-top:22px}
+.scenario-top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.scenario-top h2{margin:0;color:var(--navy);font-size:21px}
+.scenario-top .effort-title{color:var(--orange)}
+.selector{min-width:270px}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:12.5px}
+th{background:var(--navy);color:#C1E6F5;text-align:left;padding:10px 9px}
+td{padding:10px 9px;border-bottom:1px solid #E4DED2}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+tr.current td{background:#FFF4E8;font-weight:700}
+.badge{display:inline-block;background:#EAF4EE;color:var(--green);padding:3px 7px;border-radius:999px;font-size:10px;font-weight:800}
+.note{font-size:11px;color:var(--steel);line-height:1.45;margin-top:10px}
+.hidden{display:none!important}
+@media(max-width:900px){
+  .global,.partidas-grid,.agile-grid{grid-template-columns:1fr}
+  .field-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:900px){
+  .header-inner{flex-direction:column}
+  .brand-area{align-items:flex-start}
+  .brand-box{min-width:0}
+  .brand-box img{max-width:240px}
+}
+@media(max-width:700px){.global-values{grid-template-columns:1fr;min-width:100%}}
+@media(max-width:600px){
+  main{padding:18px 12px} header{padding:26px 16px}
+  .global-card{align-items:flex-start;flex-direction:column}.global-input{min-width:100%}
+  .field-grid,.agile-main,.calc-strip,.agile-results{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="header-inner">
+    <div class="header-copy">
+      <div class="eyebrow">Grupo ITSA · Productividad · Mano de obra · Planificación</div>
+      <h1>Calculadora Multiparti﻿da de Esfuerzo (DH)</h1>
+      <p>Convierte cada partida en una carga de trabajo estable expresada en días-hombre. Desde ese esfuerzo puedes derivar cuadrilla, plazo, rendimiento requerido y valor económico sin perder la relación con el método tradicional.</p>
+    </div>
+    <div class="brand-area">
+      <div class="brand-box">
+        <img src="https://static.wixstatic.com/media/dcd980_b43196eb075747a09ba3e71468777909~mv2.png" alt="Grupo ITSA">
+      </div>
+      <div class="training-badge">Medio auxiliar de capacitación</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="global">
+    <div class="card global-card">
+      <div>
+        <h2>Parámetro global del proyecto</h2>
+        <p>Se aplica a todas las partidas y permite convertir esfuerzo en valor meta.</p>
+      </div>
+      <div class="global-values">
+        <div class="global-input">
+          <label>Valor del día-hombre · Albañil</label>
+          <div class="input-wrap"><input id="globalVDH" type="number" min="0" step="0.01" value="255"><span class="unit">Q / DH</span></div>
+        </div>
+        <div class="global-input">
+          <label>Valor del día-hombre · Ayudante</label>
+          <div class="input-wrap"><input id="globalHelperVDH" type="number" min="0" step="0.01" value="131.58"><span class="unit">Q / DH</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card concept-card">
+      <p><b>Idea:</b> el rendimiento describe productividad; el <b>esfuerzo</b> describe carga total de trabajo. Para programar, la relación se simplifica a <b>Personal = Esfuerzo / Días</b>.</p>
+    </div>
+  </section>
+
+  <div class="modebar">
+    <button id="modeCompare" class="active">Capacitación · método tradicional + esfuerzo</button>
+    <button id="modeAgile">Modo ágil · esfuerzo</button>
+  </div>
+
+  <section id="traditionalSection">
+    <div class="section-head">
+      <div>
+        <h2>1. Partidas · método tradicional</h2>
+        <p>Área, rendimiento teórico y días programados. El esfuerzo se calcula automáticamente.</p>
+      </div>
+      <div class="countbar" id="partidaCountBar">
+        <span>Cantidad de partidas:</span>
+        <button data-count="2">2</button>
+        <button data-count="3">3</button>
+        <button data-count="4">4</button>
+        <button data-count="5">5</button>
+        <button data-count="6">6</button>
+        <button data-count="7">7</button>
+        <button data-count="8">8</button>
+      </div>
+    </div>
+    <div class="partidas-grid" id="partidasGrid"></div>
+  </section>
+
+  <section id="agileSection">
+    <div class="section-head">
+      <div>
+        <h2>2. Partidas · método ágil por esfuerzo</h2>
+        <p>El esfuerzo queda siempre vinculado a Área / Rendimiento. Solo modificas el plazo y observas la cuadrilla necesaria.</p>
+      </div>
+    </div>
+    <div class="agile-grid" id="agileGrid"></div>
+  </section>
+
+  <section class="card scenario-card">
+    <div class="scenario-top">
+      <div>
+        <h2>Escenarios · <span class="effort-title" id="scenarioEffortTitle">89.19 DH</span> · <span id="scenarioDaysTitle">6 días</span> · <span id="scenarioMetaTitle">Q 0.00 meta albañiles</span></h2>
+        <div class="note">Los días permanecen iguales a los programados. Se muestran tres escenarios con menos albañiles y tres con más albañiles, variando de uno en uno.</div>
+      </div>
+      <div class="selector">
+        <label>Partida para analizar</label>
+        <div class="input-wrap"><select id="scenarioSelect"></select></div>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Albañiles</th>
+          <th>Ayudantes</th>
+          <th>Rendimiento</th>
+          <th>Diario / albañil</th>
+          <th>Costo total meta</th>
+          <th>% de variación</th>
+          <th>Lectura</th>
+        </tr>
+      </thead>
+      <tbody id="scenarioBody"></tbody>
+    </table>
+    <div class="note">
+      Criterios: esfuerzo, días programados y valor meta de albañiles permanecen fijos y se muestran en el encabezado. La cuadrilla base = esfuerzo / días, redondeada hacia arriba; cada escenario varía ±1 albañil hasta tres posiciones; ayudantes = 1 por cada 2 albañiles, redondeado hacia abajo; rendimiento = área / (días × albañiles); diario/albañil = valor meta de albañiles / días / albañiles; costo total meta = valor meta de albañiles + días × ayudantes × valor DH ayudante. La variación porcentual se compara contra el escenario actual.
+    </div>
+  </section>
+  <div class="note" style="margin-top:22px;text-align:center">
+    Grupo ITSA · Medio auxiliar de capacitación · Herramienta didáctica para análisis de esfuerzo, productividad y dimensionamiento de cuadrillas.
+  </div>
+</main>
+</div>
+
+<script>
+const COLORS=['#E8722C','#0E3A5C','#3E8E5C','#8B5CA8','#C24B4B','#2A9D8F','#D49A21','#5B7DB1'];
+const $=id=>document.getElementById(id);
+const fmt=(v,d=2)=>Number(v).toLocaleString('es-GT',{minimumFractionDigits:d,maximumFractionDigits:d});
+const money=v=>'Q '+fmt(v,2);
+const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+
+const partidaPool=[
+  {name:'Partida 1',area:551.20,rend:6.18,days:6},
+  {name:'Partida 2',area:420.00,rend:5.50,days:7},
+  {name:'Partida 3',area:310.00,rend:4.80,days:8},
+  {name:'Partida 4',area:680.00,rend:7.20,days:9},
+  {name:'Partida 5',area:300.00,rend:5.00,days:6},
+  {name:'Partida 6',area:300.00,rend:5.00,days:6},
+  {name:'Partida 7',area:300.00,rend:5.00,days:6},
+  {name:'Partida 8',area:300.00,rend:5.00,days:6},
+];
+let numPartidas=4;
+function partidasActivas(){return partidaPool.slice(0,numPartidas)}
+
+function vdh(){return Math.max(0,Number($('globalVDH').value)||0)}
+function helperVdh(){return Math.max(0,Number($('globalHelperVDH').value)||0)}
+function calc(p){
+  const area=Math.max(.0001,Number(p.area)||.0001);
+  const rend=Math.max(.0001,Number(p.rend)||.0001);
+  const days=Math.max(1,Number(p.days)||1);
+  const effort=area/rend;
+  const meta=effort*vdh();
+  const trato=meta/area;
+  const exact=effort/days;
+  const alba=Math.ceil(exact);
+  const ayud=Math.floor(alba/2);
+  return {area,rend,days,effort,meta,trato,exact,alba,ayud};
+}
+
+function renderTraditional(){
+  const partidas=partidasActivas();
+  $('partidasGrid').innerHTML=partidas.map((p,i)=>{
+    const c=calc(p);
+    return `
+    <article class="card partida" style="--c:${COLORS[i%COLORS.length]}">
+      <div class="partida-head">
+        <input class="partida-title" data-i="${i}" data-f="name" value="${escapeHtml(p.name)}">
+        <span class="index-tag">PARTIDA ${i+1}</span>
+      </div>
+      <div class="field-grid">
+        <div>
+          <label>Área</label>
+          <div class="input-wrap"><input type="number" min=".01" step=".01" data-i="${i}" data-f="area" value="${p.area}"><span class="unit">m²</span></div>
+        </div>
+        <div>
+          <label>Rendimiento teórico</label>
+          <div class="input-wrap"><input type="number" min=".01" step=".01" data-i="${i}" data-f="rend" value="${p.rend}"><span class="unit">m²/DH</span></div>
+        </div>
+        <div>
+          <label>Días disponibles</label>
+          <div class="input-wrap"><input type="number" min="1" max="120" step="1" data-i="${i}" data-f="days" value="${p.days}"><span class="unit">días</span></div>
+        </div>
+      </div>
+      <div class="calc-strip">
+        <div class="calc eff"><div class="l">Esfuerzo</div><div class="v" data-out="${i}-eff">${fmt(c.effort,2)} DH</div></div>
+        <div class="calc"><div class="l">Trato / m²</div><div class="v" data-out="${i}-trato">${money(c.trato)}</div></div>
+        <div class="calc"><div class="l">Valor meta</div><div class="v" data-out="${i}-meta">${money(c.meta)}</div></div>
+        <div class="calc"><div class="l">Albañiles</div><div class="v" data-out="${i}-alba">${c.alba}</div></div>
+      </div>
+    </article>`;
+  }).join('');
+
+  document.querySelectorAll('#partidasGrid [data-i]').forEach(el=>{
+    const evt=el.dataset.f==='name'?'change':'input';
+    el.addEventListener(evt,e=>{
+      const i=Number(e.target.dataset.i), f=e.target.dataset.f;
+      partidaPool[i][f]=f==='name'?e.target.value:Number(e.target.value);
+      if(f==='name'){
+        renderScenarioSelector();
+        renderAgile();
+      } else {
+        updateTraditionalOutputs(i);
+        renderAgile();
+        renderScenarios();
+      }
+    });
+  });
+}
+
+
+function updateTraditionalOutputs(i){
+  const c=calc(partidaPool[i]);
+  const vals={
+    [`${i}-eff`]:fmt(c.effort,2)+' DH',
+    [`${i}-trato`]:money(c.trato),
+    [`${i}-meta`]:money(c.meta),
+    [`${i}-alba`]:c.alba
+  };
+  Object.entries(vals).forEach(([key,val])=>{
+    const el=document.querySelector(`[data-out="${key}"]`);
+    if(el)el.textContent=val;
+  });
+}
+
+function renderAgile(){
+  const partidas=partidasActivas();
+  $('agileGrid').innerHTML=partidas.map((p,i)=>{
+    const c=calc(p);
+    return `
+    <article class="card agile-card">
+      <div class="partida-head">
+        <input class="partida-title" data-agile-name-i="${i}" value="${escapeHtml(p.name)}">
+        <span class="index-tag">PARTIDA ${i+1}</span>
+      </div>
+      <div class="agile-main">
+        <div class="readonly">
+          <div class="l">Esfuerzo total vinculado</div>
+          <div class="v">${fmt(c.effort,2)} DH</div>
+        </div>
+        <div>
+          <label>Días disponibles / a programar</label>
+          <div class="input-wrap"><input type="number" min="1" max="120" step="1" data-agile-i="${i}" value="${p.days}"><span class="unit">días</span></div>
+          <div class="range-row">
+            <div class="rh"><span>Duración</span><span>${p.days} d</span></div>
+            <input type="range" min="1" max="30" value="${clamp(p.days,1,30)}" data-slider-i="${i}">
+          </div>
+        </div>
+      </div>
+      <div class="agile-results">
+        <div class="mini"><div class="l">Albañiles</div><div class="v">${c.alba}</div></div>
+        <div class="mini"><div class="l">Ayudantes</div><div class="v">${c.ayud}</div></div>
+        <div class="mini"><div class="l">Valor meta</div><div class="v">${money(c.meta)}</div></div>
+      </div>
+    </article>`;
+  }).join('');
+
+  document.querySelectorAll('[data-agile-name-i]').forEach(inp=>{
+    inp.addEventListener('change',e=>{
+      const i=Number(e.target.dataset.agileNameI);
+      partidaPool[i].name=e.target.value;
+      renderTraditional();
+      renderScenarioSelector();
+      renderScenarios();
+    });
+  });
+  document.querySelectorAll('[data-agile-i]').forEach(inp=>{
+    inp.addEventListener('change',e=>{
+      partidaPool[Number(e.target.dataset.agileI)].days=Math.max(1,Number(e.target.value)||1);
+      renderAll(false);
+    });
+  });
+  document.querySelectorAll('[data-slider-i]').forEach(inp=>{
+    inp.addEventListener('input',e=>{
+      partidaPool[Number(e.target.dataset.sliderI)].days=Number(e.target.value);
+      renderAll(false);
+    });
+  });
+}
+
+function renderScenarioSelector(){
+  const partidas=partidasActivas();
+  const old=Number($('scenarioSelect').value)||0;
+  $('scenarioSelect').innerHTML=partidas.map((p,i)=>`<option value="${i}">${escapeHtml(p.name)}</option>`).join('');
+  $('scenarioSelect').value=String(Math.min(old,partidas.length-1));
+}
+
+function renderScenarios(){
+  const partidas=partidasActivas();
+  const i=clamp(Number($('scenarioSelect').value)||0,0,partidas.length-1);
+  const p=partidas[i], c=calc(p);
+  $('scenarioEffortTitle').textContent=fmt(c.effort,2)+' DH';
+  $('scenarioDaysTitle').textContent=fmt(c.days,0)+' días programados';
+  $('scenarioMetaTitle').textContent=money(c.meta)+' meta albañiles';
+
+  const baseAlba=Math.max(1,c.alba);
+  const baseAyud=Math.floor(baseAlba/2);
+  const baseTotalMeta=c.meta + (c.days*baseAyud*helperVdh());
+  const crews=[];
+  for(let a=baseAlba-3;a<=baseAlba+3;a++){
+    if(a>=1)crews.push(a);
+  }
+
+  $('scenarioBody').innerHTML=crews.map(alba=>{
+    const ayud=Math.floor(alba/2);
+    const rendNeeded=c.area/(c.days*alba);
+    const dailyPerAlba=c.meta/c.days/alba;
+    const totalMeta=c.meta + (c.days*ayud*helperVdh());
+    const variation=baseTotalMeta>0 ? ((totalMeta-baseTotalMeta)/baseTotalMeta)*100 : 0;
+    const current=alba===baseAlba;
+    const varClass=variation<0?'var-neg':variation>0?'var-pos':'var-zero';
+    const varText=(variation>0?'+':'')+fmt(variation,2)+'%';
+    let reading;
+    if(current){
+      reading='<span class="badge">ESCENARIO ACTUAL</span> Base de comparación';
+    }else if(variation<0){
+      reading='Ahorro por menor dotación de ayudantes';
+    }else if(variation>0){
+      reading='Sobrecosto por mayor dotación de ayudantes';
+    }else{
+      reading=alba<baseAlba?'Menor cuadrilla, mismo costo auxiliar':'Mayor cuadrilla, mismo costo auxiliar';
+    }
+    return `<tr class="${current?'current':''}">
+      <td class="num"><b>${alba}</b></td>
+      <td class="num">${ayud}</td>
+      <td class="num">${fmt(rendNeeded,2)} m²/DH</td>
+      <td class="num"><b>${money(dailyPerAlba)}</b></td>
+      <td class="num"><b>${money(totalMeta)}</b></td>
+      <td class="num ${varClass}">${varText}</td>
+      <td>${reading}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAll(resetSelector=true){
+  renderTraditional();
+  renderAgile();
+  if(resetSelector)renderScenarioSelector();
+  else{
+    const current=$('scenarioSelect').value;
+    renderScenarioSelector();
+    $('scenarioSelect').value=current;
+  }
+  renderScenarios();
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+$('globalVDH').addEventListener('input',()=>renderAll(false));
+$('globalHelperVDH').addEventListener('input',renderScenarios);
+function buildPartidaCountButtons(){
+  document.querySelectorAll('#partidaCountBar button').forEach(btn=>{
+    const n=Number(btn.dataset.count);
+    btn.classList.toggle('active',n===numPartidas);
+    btn.onclick=()=>{
+      numPartidas=n;
+      buildPartidaCountButtons();
+      renderAll();
+    };
+  });
+}
+
+$('scenarioSelect').addEventListener('change',renderScenarios);
+
+$('modeCompare').onclick=()=>{
+  $('modeCompare').classList.add('active');$('modeAgile').classList.remove('active');
+  $('traditionalSection').classList.remove('hidden');
+  $('agileSection').classList.add('hidden');
+};
+$('modeAgile').onclick=()=>{
+  $('modeAgile').classList.add('active');$('modeCompare').classList.remove('active');
+  $('traditionalSection').classList.add('hidden');
+  $('agileSection').classList.remove('hidden');
+};
+
+buildPartidaCountButtons();
+renderAll();
+$('agileSection').classList.add('hidden');
+</script>
+</body>
+</html>
